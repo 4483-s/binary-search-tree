@@ -42,7 +42,23 @@ class Tree {
       }
     }
   }
-  deleteItem(value) {}
+  deleteItem(value) {
+    let temp = new Node(0);
+    temp.right = this.root;
+    while (temp.right || temp.left) {}
+  }
+  find(value) {
+    const currentNode = this.root;
+    while (true) {
+      if (value > currentNode.data) {
+        currentNode = currentNode.right;
+      } else if (value < currentNode.data) {
+        currentNode = currentNode.left;
+      } else {
+        return currentNode;
+      }
+    }
+  }
 }
 const prettyPrint = (node, prefix = "", isLeft = true) => {
   if (node === null) {
