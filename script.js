@@ -39,6 +39,8 @@ class Tree {
           return;
         }
         currentNode = currentNode.left;
+      } else {
+        return;
       }
     }
   }
@@ -49,7 +51,7 @@ class Tree {
   }
   find(value) {
     const currentNode = this.root;
-    while (true) {
+    while (currentNode.right || currentNode.left) {
       if (value > currentNode.data) {
         currentNode = currentNode.right;
       } else if (value < currentNode.data) {
