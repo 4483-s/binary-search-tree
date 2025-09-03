@@ -70,7 +70,6 @@ class Tree {
       }
       swapTarget.left = target.left;
       const parentOfSwap = this.#verboseFind(swapTarget.data, true)[1];
-      console.log(parentOfSwap);
       if (swapTarget.right) {
         this.#childAtRight(swapTarget, parentOfSwap)
           ? (parentOfSwap.right = swapTarget.right)
@@ -79,9 +78,9 @@ class Tree {
         this.#childAtRight(swapTarget, parentOfSwap)
           ? (parentOfSwap.right = null)
           : (parentOfSwap.left = null);
-        swapTarget.right = target.right;
-        chrght ? (parent.right = swapTarget) : (parent.left = swapTarget);
       }
+      swapTarget.right = target.right;
+      chrght ? (parent.right = swapTarget) : (parent.left = swapTarget);
     }
     if (target === this.root) this.root = parent.right;
   }
@@ -199,6 +198,14 @@ class Tree {
     return !node.left && !node.right;
   }
 }
+const ar = (len, max) => {
+  const arr = [];
+  for (let i = 0; i < len; i++) {
+    arr.push(Math.floor(Math.random() * max));
+  }
+  return arr;
+};
+let n = new Tree(ar(30, 90));
 const prettyPrint = (node, prefix = "", isLeft = true) => {
   if (node === null) {
     return;
