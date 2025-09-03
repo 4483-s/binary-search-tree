@@ -54,35 +54,31 @@ class Tree {
     if (!target) return null;
     const chrght = this.#childAtRight(target, parent);
     //target has no child
-    if (!target.left && !target.right)
-      chrght ? (parent.right = null) : (parent.left = null);
+    if (!target.left && !target.right) this.#deleteLeaf(parent, chrght);
     //target has left child
     else if (target.left && !target.right)
-      chrght ? (parent.right = target.left) : (parent.left = target.left);
+      this.#deleteOneChildNode(parent, target.left, chrght);
     //target has right child
     else if (!target.left && target.right)
-      chrght ? (parent.right = target.right) : (parent.left = target.right);
-    //target has two children
+      this.#deleteOneChildNode(parent, target.right, chrght);
     else {
-      let swapTarget = target.right;
-      while (swapTarget.left) {
-        swapTarget = swapTarget.left;
+      let suc = target.right;
+      while (suc.left) {
+        suc = suc.left;
       }
-      swapTarget.left = target.left;
-      const parentOfSwap = this.#verboseFind(swapTarget.data, true)[1];
-      if (swapTarget.right) {
-        this.#childAtRight(swapTarget, parentOfSwap)
-          ? (parentOfSwap.right = swapTarget.right)
-          : (parentOfSwap.left = swapTarget.right);
-      } else {
-        this.#childAtRight(swapTarget, parentOfSwap)
-          ? (parentOfSwap.right = null)
-          : (parentOfSwap.left = null);
-      }
-      swapTarget.right = target.right;
-      chrght ? (parent.right = swapTarget) : (parent.left = swapTarget);
+      const par = this.#verboseFind(suc.data, true)[1];
+      target.data = suc.data;
+      const dir = suc === par.right;
+      this.#deleteOneChildNode(par, suc.right, dir);
     }
     if (target === this.root) this.root = parent.right;
+  }
+  #deleteLeaf(parent, direction) {
+    if (direction) parent.right = null;
+    else parent.left = null;
+  }
+  #deleteOneChildNode(parent, newChild, direction) {
+    direction ? (parent.right = newChild) : (parent.left = newChild);
   }
   #childAtRight(child, parent) {
     return parent.right === child;
