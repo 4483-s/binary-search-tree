@@ -5,252 +5,199 @@ class Node {
     this.data = data;
   }
 }
-function Tree(arr) {
-  const array = Array.from(new Set(arr.toSorted((a, b) => a - b)));
-  let root = binaryTree(array);
-  function binaryTree(arr) {
-    if (arr.length === 1) {
-      return new Node(arr[0]);
-    }
-    let mid = Math.floor(arr.length / 2);
-    const root = new Node(arr[mid]);
-    const left = arr.slice(0, mid);
-    const right = arr.slice(mid + 1);
-    root.left = left.length ? binaryTree(left) : null;
-    root.right = right.length ? binaryTree(right) : null;
-
+class Tree {
+  constructor(arr) {
+    this.root = this.buildTree(
+      Array.from(new Set(arr.toSorted((a, b) => a - b))),
+    );
+  }
+  buildTree(arr) {
+    if (!arr.length) return null;
+    if (arr.length === 1) return new Node(arr[0]);
+    const midIndex = Math.floor(arr.length / 2);
+    const left = arr.slice(0, midIndex);
+    const right = arr.slice(midIndex + 1);
+    const root = new Node(arr[midIndex]);
+    const l = this.buildTree(left);
+    const r = this.buildTree(right);
+    root.left = l;
+    root.right = r;
     return root;
   }
-  function insert(value) {
+  insert(value) {
     const node = new Node(value);
-    if (!root) {
-      root = node;
+    if (!this.root) {
+      this.root = node;
       return;
     }
-    let currentNode = root;
-    while (true) {
-      if (currentNode.data < value) {
-        if (!currentNode.right) {
-          currentNode.right = node;
+    const fn = (ro) => {
+      if (ro.data === value) return false;
+      const toLeft = ro.data > value;
+      if (toLeft) {
+        if (ro.left) {
+          fn(ro.left);
           return;
         }
-        currentNode = currentNode.right;
-      } else if (currentNode.data > value) {
-        if (!currentNode.left) {
-          currentNode.left = node;
-          return;
-        }
-        currentNode = currentNode.left;
-      }
-      // if same value is met, return
-      else {
-        console.error("Invalid  or dublicated value, exiting...");
-        return;
-      }
-    }
-  }
-  function deleteItem(value) {
-    const [parent, target] = find(value, true);
-    const targetIsRoot = target === root;
-    const targetAtRight = parent.right === target;
-    if (!target.right && !target.left) {
-      //doesn't prevent remove root
-      targetAtRight ? (parent.right = null) : (parent.left = null);
-    }
-    //when target has left
-    else if (!target.right && target.left) {
-      targetAtRight
-        ? (parent.right = target.left)
-        : (parent.left = target.left);
-    }
-    //when target has right
-    else if (target.right && !target.left) {
-      targetAtRight
-        ? (parent.right = target.right)
-        : (parent.left = target.right);
-    }
-    //when target has right and left
-    else if (target.right && target.left) {
-      let swap = target.right;
-      while (swap.left) {
-        swap = swap.left;
-      }
-      swap.left = target.left;
-      const par = find(swap.data, true)[0];
-      if (swap.right)
-        par.right === swap ? (par.right = swap.right) : (par.left = swap.right);
-      else par.right === swap ? (par.right = null) : (par.left = null);
-      targetAtRight ? (parent.right = swap) : (parent.left = swap);
-      swap.right = target.right;
-    }
-    if (targetIsRoot) {
-      root = parent.right ? parent.right : parent.left;
-    }
-  }
-  // if given parent is true, find the parent of target value as well then return a array
-  function find(value, parent) {
-    let currentNode = root;
-    let tempParent;
-    if (parent) {
-      tempParent = new Node(0);
-      root.data > tempParent.data
-        ? (tempParent.right = root)
-        : (tempParent.left = root);
-    }
-    while (true) {
-      if (!currentNode) return null;
-      if (value > currentNode.data) {
-        if (tempParent) tempParent = currentNode;
-        currentNode = currentNode.right;
-      } else if (value < currentNode.data) {
-        if (tempParent) tempParent = currentNode;
-        currentNode = currentNode.left;
-      } else if (value === currentNode.data) {
-        return parent ? [tempParent, currentNode] : currentNode;
-      }
-    }
-  }
-  function levelOrderForEach(callback) {
-    if (!callback) {
-      console.error("no callback, exiting...");
-      return;
-    }
-    const arr = [];
-    arr.push(root);
-    while (arr.length) {
-      const len = arr.length;
-      arr.forEach((v) => {
-        callback(v);
-        if (v.left) arr.push(v.left);
-        if (v.right) arr.push(v.right);
-      });
-      arr.splice(0, len);
-    }
-  }
-  function recLevelOrderForEach(callback) {
-    if (!callback) {
-      console.error("no callback, exiting...");
-      return;
-    }
-    const arr = [];
-    arr.push(root);
-    function rec(arr) {
-      let len = arr.length;
-      if (!len) return;
-      arr.forEach((v) => {
-        callback(v);
-        if (v.left) arr.push(v.left);
-        if (v.right) arr.push(v.right);
-      });
-      arr.splice(0, len);
-      rec(arr);
-    }
-    rec(arr);
-  }
-  function inOrderForEach(callback) {
-    if (!callback) {
-      console.error("no callback, exiting...");
-      return;
-    }
-    function rec(node) {
-      if (node.left) rec(node.left);
-      callback(node);
-      if (node.right) rec(node.right);
-    }
-    rec(root);
-  }
-  function preOrderForEach(callback) {
-    if (!callback) {
-      console.error("no callback, exiting...");
-      return;
-    }
-    function rec(node) {
-      callback(node);
-      if (node.left) rec(node.left);
-      if (node.right) rec(node.right);
-    }
-    rec(root);
-  }
-  function postOrderForEach(callback) {
-    if (!callback) {
-      console.error("no callback, exiting...");
-      return;
-    }
-    function rec(node) {
-      if (node.left) rec(node.left);
-      if (node.right) rec(node.right);
-      callback(node);
-    }
-    rec(root);
-  }
-  function height(value) {
-    const arr = [];
-    levelOrderForEach((v) => {
-      arr.push(v.data);
-    });
-    let deepest = arr[arr.length - 1];
-    let depthOfValue = depth(value);
-    let depthOfDeepest = depth(deepest);
-    if (
-      typeof depthOfDeepest === "number" &&
-      typeof depthOfValue === "number"
-    ) {
-      return depthOfDeepest - depthOfValue;
-    }
-    return null;
-  }
-  function depth(value) {
-    let count = 0;
-    let temp = root;
-    while (true) {
-      if (!temp) return null;
-      if (value > temp.data) {
-        temp = temp.right;
-      } else if (value < temp.data) {
-        temp = temp.left;
-      } else if (temp.data === value) {
-        return count;
+        ro.left = node;
       } else {
-        return null;
+        if (ro.right) {
+          fn(ro.right);
+          return;
+        }
+        ro.right = node;
       }
-      count++;
-    }
+    };
+    fn(this.root);
   }
-  function isBalanced() {
-    let result = true;
-    levelOrderForEach((v) => {
-      let leftHeight = v.left ? height(v.left.data) + 1 : 0;
-      let rightHeight = v.right ? height(v.right.data) + 1 : 0;
-      if (Math.abs(leftHeight - rightHeight) > 1) {
-        result = false;
+  deleteItem(value) {
+    const [target, parent] = this.#verboseFind(value, true);
+    if (!target) return null;
+    const chrght = this.#childAtRight(target, parent);
+    //target has no child
+    if (!target.left && !target.right)
+      chrght ? (parent.right = null) : (parent.left = null);
+    //target has left child
+    else if (target.left && !target.right)
+      chrght ? (parent.right = target.left) : (parent.left = target.left);
+    //target has right child
+    else if (!target.left && target.right)
+      chrght ? (parent.right = target.right) : (parent.left = target.right);
+    //target has two children
+    else {
+      let swapTarget = target.right;
+      while (swapTarget.left) {
+        swapTarget = swapTarget.left;
       }
+      swapTarget.left = target.left;
+      const parentOfSwap = this.#verboseFind(swapTarget.data, true)[1];
+      console.log(parentOfSwap);
+      if (swapTarget.right) {
+        this.#childAtRight(swapTarget, parentOfSwap)
+          ? (parentOfSwap.right = swapTarget.right)
+          : (parentOfSwap.left = swapTarget.right);
+      } else {
+        this.#childAtRight(swapTarget, parentOfSwap)
+          ? (parentOfSwap.right = null)
+          : (parentOfSwap.left = null);
+        swapTarget.right = target.right;
+        chrght ? (parent.right = swapTarget) : (parent.left = swapTarget);
+      }
+    }
+    if (target === this.root) this.root = parent.right;
+  }
+  #childAtRight(child, parent) {
+    return parent.right === child;
+  }
+  #verboseFind(value, findParent) {
+    if (!this.root) return null;
+    let parent;
+    if (findParent) {
+      parent = new Node(null);
+      parent.right = this.root;
+    }
+    const fn = (ro) => {
+      if (ro.data === value) return ro;
+      parent = ro;
+      const toLeft = ro.data > value;
+      const toRight = ro.data < value;
+      if (toLeft) {
+        return ro.left ? fn(ro.left) : null;
+      } else if (toRight) {
+        return ro.right ? fn(ro.right) : null;
+      } else return null;
+    };
+    return findParent ? [fn(this.root), parent] : fn(this.root);
+  }
+  find(value) {
+    return this.#verboseFind(value);
+  }
+  #throwErr() {
+    throw new Error("Fatal Error: callback is not given, exiting...");
+  }
+  levelOrderForEach(callback) {
+    if (!callback) this.#throwErr();
+    const q = [];
+    const fn = (node) => {
+      if (!node) return;
+      callback(q[0]);
+      q.shift();
+      if (node.left) q.push(node.left);
+      if (node.right) q.push(node.right);
+      fn(q[0]);
+    };
+    fn(this.root);
+  }
+  inOrderForEach(callback) {
+    if (!callback) this.#throwErr();
+    const fn = (node) => {
+      if (!node) return;
+      fn(node.left);
+      callback(node);
+      fn(node.right);
+    };
+    fn(this.root);
+  }
+  preOrderForEach(callback) {
+    if (!callback) this.#throwErr();
+    const fn = (node) => {
+      if (!node) return;
+      callback(node);
+      fn(node.left);
+      fn(node.right);
+    };
+    fn(this.root);
+  }
+  postOrderForEach(callback) {
+    if (!callback) this.#throwErr();
+    const fn = (node) => {
+      if (!node) return;
+      fn(node.left);
+      fn(node.right);
+      callback(node);
+    };
+    fn(this.root);
+  }
+  height(value) {
+    const target = this.find(value);
+    if (!target) return null;
+    const fn = (node) => {
+      if (!node) return 0;
+      if (this.#chldlss(node)) return 0;
+      return 1 + Math.max(fn(node.left), fn(node.right));
+    };
+    return fn(target);
+  }
+  depth(value) {
+    const fn = (node) => {
+      if (!node) return null;
+      if (node.data === value) return 0;
+      const pre = fn(value > node.data ? node.right : node.left);
+      return pre === null ? null : 1 + pre;
+    };
+    return fn(this.root);
+  }
+  isBalanced() {
+    let result = true;
+    this.inOrderForEach((v) => {
+      let leftHeight = 0;
+      let rightHeight = 0;
+      if (v.left) leftHeight = 1 + this.height(v.left.data);
+      if (v.right) rightHeight = 1 + this.height(v.right.data);
+      if (Math.abs(leftHeight - rightHeight) > 1) result = false;
     });
     return result;
   }
-  function rebalance() {
-    const arr = [];
-    inOrderForEach((v) => {
-      arr.push(v.data);
+  reBalance() {
+    if (this.isBalanced()) return;
+    const a = [];
+    this.inOrderForEach((v) => {
+      a.push(v.data);
     });
-    root = binaryTree(arr);
+    this.root = this.buildTree(a);
   }
-  return {
-    rebalance,
-    isBalanced,
-    height,
-    depth,
-    preOrderForEach,
-    postOrderForEach,
-    inOrderForEach,
-    recLevelOrderForEach,
-    levelOrderForEach,
-    insert,
-    deleteItem,
-    find: (v) => find(v, false),
-    get root() {
-      return root;
-    },
-  };
+  #chldlss(node) {
+    return !node.left && !node.right;
+  }
 }
 const prettyPrint = (node, prefix = "", isLeft = true) => {
   if (node === null) {
